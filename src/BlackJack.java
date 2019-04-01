@@ -266,8 +266,8 @@ public class BlackJack {
 	
 	public int reveal(){
 		while(dealer.calculateScore() < 17 && dealer.calculateScore() < user.calculateScore() && dealer.calculateScore() != -1 && user.calculateScore() != -1){
-			dealer.drawCard(deck.deal());
 			displayStatus(true);
+			dealer.drawCard(deck.deal());
 		}
 		displayStatus(true);
 		return calculateWinner();
