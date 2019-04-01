@@ -68,6 +68,7 @@ public class Player {
 		return _score;
 	}
 	
+	
 	public int calculateDealerScore(){
 		int _score = 0;
 		ArrayList<Integer> aceIndex = new ArrayList<Integer>();

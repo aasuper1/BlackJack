@@ -126,9 +126,9 @@ public class BlackJack {
 		deck.resetDeck(ranks, suits, value);
 	}
 	
-	public void playHand(ArrayList<Card> cards, double _ante){
-
-		double ante = _ante;
+	public int playHand(ArrayList<Card> cards){
+		displayStatusSplit(false, cards);
+		int doubled = 0;
 		cards.add(deck.deal());
 		boolean complete = false;
 		while(complete == false){
@@ -138,8 +138,8 @@ public class BlackJack {
 			}else{
 				option = playerOptionsSplit(cards);
 				if (option == 4){
-					ante += ante;
 					complete = true;
+					doubled = 1;
 				}
 				if (option == 2){
 					complete = true;
@@ -148,11 +148,14 @@ public class BlackJack {
 			
 			
 		}
-		transferFunds(ante, reveal());
-		
+		int reveal = reveal();
+		if (doubled == 1){
+			reveal += reveal();
+		}		
 		user.hand.clear();
 		dealer.hand.clear();
 		deck.resetDeck(ranks, suits, value);
+		return reveal;
 	}
 	
 	public void playGame(){
@@ -194,8 +197,8 @@ public class BlackJack {
 			}else if (option == 2){
 				//Do nothing
 			}else if (option == 3){
-				if (cards.get(0) == cards.get(1)){
-					split();
+				if (cards.get(0) == cards.get(1) && cards.size() == 2){
+					split(cards);
 				}
 			}else if (option == 4){
 				cards.add(deck.deal());
@@ -220,8 +223,8 @@ public class BlackJack {
 			}else if (option == 2){
 				stand();
 			}else if (option == 3){
-				if (user.hand.get(0).pointValue() == user.hand.get(1).pointValue()){
-					split();
+				if (user.hand.get(0).pointValue() == user.hand.get(1).pointValue() && user.hand.size() == 2){
+					split(user.hand);
 				}
 			}else if (option == 4){
 				doubleDown();
@@ -249,10 +252,15 @@ public class BlackJack {
 		displayStatus(false);
 	}
 	
-	public void split(){
-		//playHand() 1;
+	public void split(ArrayList<Card> card){
+		int sum = 0;
+		ArrayList<Card> A1 = new ArrayList<Card>();
+		A1.add(card.get(0));
+		sum += playHand(A1);
 		
-		//playHand() 2;
+		ArrayList<Card> A2 = new ArrayList<Card>();
+		A2.add(card.get(1));
+		sum += playHand(A2);
 		
 	}
 	
@@ -289,6 +297,31 @@ public class BlackJack {
 		
 	}
 	
+	public void displayStatusSplit(boolean complete, ArrayList<Card> card){
+		if (!complete){
+			System.out.println("Dealer Score: " + (dealer.calculateDealerScore()));
+			
+			System.out.print("Dealer Hand: ");
+			System.out.println(dealer.hand.subList(1, dealer.hand.size()).toString() + " + MYSTERY CARD");			
+			System.out.println("Your Score: " + ((calculateScore(card) == -1) ? "Bust" : calculateScore(card)));
+			System.out.print("Your Hand: ");
+			System.out.println(card.toString());
+			System.out.println("ChipTotal: " + user.getChipTotal());
+			System.out.println("");
+		}else{
+			System.out.println("Dealer Score: " + ((dealer.calculateScore() == -1) ? "Bust" : dealer.calculateScore()));
+			System.out.print("Dealer Hand: ");
+			System.out.println(dealer.hand.subList(0, dealer.hand.size()).toString());			
+			System.out.println("Your Score: " + ((calculateScore(card) == -1) ? "Bust" : calculateScore(card)));
+			System.out.print("Your Hand: ");
+			System.out.println(card.toString());
+			System.out.println("ChipTotal: " + user.getChipTotal());
+			System.out.println("");
+		}
+		
+	}
+	
+	
 	public int calculateWinner(){
 		if (user.calculateScore() == dealer.calculateScore()){
 			System.out.println("It is a push");
@@ -300,7 +333,7 @@ public class BlackJack {
 		}
 		if (user.calculateScore() < dealer.calculateScore()){
 			System.out.println("You Lose");
-			return 2;
+			return -1;
 		}
 		
 		return -1;
@@ -311,7 +344,7 @@ public class BlackJack {
 			user.setChipTotal(user.chipTotal);
 		}else if (t == 1){
 			user.setChipTotal(user.chipTotal + i);
-		}else if (t == 2){
+		}else if (t == -1){
 			user.setChipTotal(user.chipTotal - i);
 		}
 	}
